@@ -3,6 +3,7 @@ name: Deploy Vue Site to GitHub Pages
 on:
   push:
     branches: [ main ] # 监听 main 分支的提交
+  workflow_dispatch:   # 支持在 GitHub 网页上手动点击一键触发
 
 permissions:
   contents: read
