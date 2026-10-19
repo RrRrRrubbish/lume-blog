@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import defaultAvatar from '../assets/Ark1.jpg'
 
 // ====================================================================
 // 用户认证与博主档案 Store (userStore.js)
@@ -18,7 +19,7 @@ const defaultProfile = {
   class: '24计科1班',
   role: '计算机科学与技术学子 · 前端开发者',
   major: '计算机科学与技术',
-  avatar: '/Ark1.jpg',
+  avatar: defaultAvatar,
   bio: '热爱探索现代 Web 前端技术与单页面应用 (SPA) 架构。以 Lume Blog 为载体，系统实践 Vue 3 核心技术栈、Vue Router 路由工程化与 Pinia 全局状态管理。',
   detailedIntro: '目前大三在读，系统钻研了数据结构、计算机网络及 Vue 3 生态。在实验三与实验四中，深入掌握了路由工程化、Pinia 全局状态集中管理、状态持久化与路由前置守卫联动实战。',
   goals: '熟练掌握 Vue 3 全家桶（Router / Pinia）、深入组件化与工程化实战、打造高品质个人作品集',
@@ -35,7 +36,15 @@ const defaultProfile = {
 function loadProfile() {
   try {
     const saved = localStorage.getItem(PROFILE_KEY)
-    return saved ? JSON.parse(saved) : { ...defaultProfile }
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // 若本地缓存仍是旧版根目录绝对路径或无效值，自动同步为 Vite 编译后的资源路径
+      if (!parsed.avatar || parsed.avatar === '/Ark1.jpg' || parsed.avatar.startsWith('/Ark1') || parsed.avatar.endsWith('Ark1.jpg')) {
+        parsed.avatar = defaultAvatar
+      }
+      return parsed
+    }
+    return { ...defaultProfile }
   } catch (e) {
     console.error('加载本地个人档案失败:', e)
     return { ...defaultProfile }

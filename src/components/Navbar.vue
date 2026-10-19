@@ -61,7 +61,7 @@
 
         <!-- 身份认证感知 -->
         <div v-if="isLoggedIn" class="auth-box">
-          <el-avatar :size="28" :src="profile?.avatar || '/favicon.webp'" class="nav-avatar" />
+          <el-avatar :size="28" :src="profile?.avatar || defaultAvatar" class="nav-avatar" />
           <el-tag type="success" size="small" effect="plain">{{ bloggerName }}</el-tag>
           <el-button type="danger" link size="small" @click="handleLogout">
             退出
@@ -93,6 +93,7 @@ import {
   Key
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import defaultAvatar from '../assets/Ark1.jpg'
 import { useUserStore } from '../stores'
 
 const props = defineProps({
