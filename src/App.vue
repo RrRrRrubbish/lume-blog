@@ -42,10 +42,24 @@ const isDarkTheme = ref(false)
 // 切换主题模式
 const toggleTheme = () => {
   isDarkTheme.value = !isDarkTheme.value
+  if (isDarkTheme.value) {
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('lume_theme', 'dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+    localStorage.setItem('lume_theme', 'light')
+  }
   console.log(`[主题切换] 当前主题已切换为：${isDarkTheme.value ? '🌙 暗色模式' : '☀️ 亮色模式'}`)
 }
 
 onMounted(() => {
+  // 恢复之前持久化的主题偏好
+  const savedTheme = localStorage.getItem('lume_theme')
+  if (savedTheme === 'dark') {
+    isDarkTheme.value = true
+    document.documentElement.classList.add('dark')
+  }
+
   console.log(
     '%c🌟 Lume Blog (Vue Router 4 工程化) 初始化成功！%c',
     'background:#2563eb;color:#fff;padding:4px 8px;border-radius:4px;font-weight:bold;',

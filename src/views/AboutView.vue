@@ -190,6 +190,9 @@ const growthTimeline = [
 
 .about-card {
   border-radius: 12px;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
 }
 
 .about-header {

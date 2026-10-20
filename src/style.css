@@ -5,6 +5,7 @@
   --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   --bg-card: rgba(255, 255, 255, 0.9);
   --bg-card-hover: #ffffff;
+  --bg-hover: #f1f5f9;
   --bg-input: #f1f5f9;
   --border-color: #e2e8f0;
   --text-main: #0f172a;
@@ -20,10 +21,12 @@
   --modal-mask: rgba(15, 23, 42, 0.5);
 }
 
-.dark-mode {
+.dark-mode,
+html.dark {
   --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
-  --bg-card: rgba(30, 41, 59, 0.85);
+  --bg-card: rgba(30, 41, 59, 0.9);
   --bg-card-hover: rgba(30, 41, 59, 1);
+  --bg-hover: #1e293b;
   --bg-input: #0f172a;
   --border-color: #334155;
   --text-main: #f8fafc;
@@ -37,6 +40,80 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
   --modal-mask: rgba(0, 0, 0, 0.7);
+}
+
+/* ====================================================================
+   Element Plus 组件深度适配 Lume Blog 设计系统
+   ==================================================================== */
+.el-card {
+  --el-card-bg-color: var(--bg-card) !important;
+  --el-border-color-light: var(--border-color) !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-card,
+html.dark .el-card {
+  --el-card-bg-color: var(--bg-card) !important;
+  --el-border-color-light: var(--border-color) !important;
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-card__header,
+html.dark .el-card__header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.dark-mode .el-table,
+html.dark .el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: var(--bg-hover) !important;
+  --el-table-border-color: var(--border-color) !important;
+  --el-table-text-color: var(--text-main) !important;
+  background-color: transparent !important;
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-table th.el-table__cell,
+html.dark .el-table th.el-table__cell {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-table td.el-table__cell,
+html.dark .el-table td.el-table__cell {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-dialog,
+html.dark .el-dialog {
+  --el-dialog-bg-color: var(--bg-card) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-input__wrapper,
+html.dark .el-input__wrapper {
+  background-color: var(--bg-hover) !important;
+  box-shadow: 0 0 0 1px var(--border-color) inset !important;
+}
+
+.dark-mode .el-input__inner,
+html.dark .el-input__inner {
+  color: var(--text-main) !important;
+}
+
+.dark-mode .el-textarea__inner,
+html.dark .el-textarea__inner {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
 }
 
 * {
