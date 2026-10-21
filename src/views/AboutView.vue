@@ -131,7 +131,7 @@ const growthTimeline = [
     hollow: false,
     tag: '基础奠基',
     tagType: 'primary',
-    desc: '考入计算机科学与技术专业本科，系统研读数据结构、计算机网络及现代 Web 核心技术规范。'
+    desc: '计算机科学与技术专业，系统研读数据结构、计算机网络及现代 Web 核心技术规范。'
   },
   {
     title: '💻 前端工程化初探 · 现代化交互界面',
