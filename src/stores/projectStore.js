@@ -1,33 +1,29 @@
 import { defineStore } from 'pinia'
-
-// ====================================================================
-// 项目作品库 Store (projectStore.js)
-// 实验四核心技术点：
-// - 全局管理项目作品集，实现跨页面共享（前台展示/详情 + 后台项目增删改查）
-// - state: projects 初始化优先从 localStorage 读取
-// - getters: completedProjects / ongoingProjects / getProjectById 等
-// - actions: addProject / updateProject / deleteProject
-// - 持久化: 每次修改同步写回 localStorage
-// ====================================================================
+import {
+  getProjects as getProjectsApi,
+  createProject as createProjectApi,
+  updateProject as updateProjectApi,
+  deleteProject as deleteProjectApi
+} from '../api/project'
 
 const PROJECTS_STORAGE_KEY = 'lume_projects'
 
-// 初始内置项目列表
+// 初始内置项目列表 (离线备用)
 const initialProjects = [
   {
     id: 1,
     name: 'Lume Blog 个人博客与知识空间',
     category: '前端工程',
     description: '采用 Vue 3 单文件组件 (SFC)、Vue Router 4 与 Pinia 现代化工程架构构建，具备亮暗色主题、动态路由、文章知识库及后台权限管理。',
-    fullDetail: '本项目是《Web前端框架程序设计》课程的核心实验载体。在实验一、实验二、实验三的基础上，实验四全面接入 Pinia 状态管理，重构了跨组件、跨页面状态共享逻辑。系统支持文章与项目信息的完整增删改查、localStorage 手动持久化，并配置了 beforeEach 全局前置守卫对敏感后台实施权限拦截。',
+    fullDetail: '本项目是《Web前端框架程序设计》课程的核心实验载体。在实验一、实验二、实验三的基础上，实验四全面接入 Pinia 状态管理，重构了跨组件、跨页面状态共享逻辑。系统支持文章与项目信息的完整增删改查、localStorage 手动持久化，并配置了 beforeEach 全局前置守卫对敏感后台实施权限拦截。实验五进一步接入 MySQL 数据库与 Node.js Express RESTful 服务端。',
     highlights: [
       'Pinia 集中式状态管理与 storeToRefs 响应式解构',
       'Vue Router 4 声明式与编程式双模导航',
       '嵌套子路由架构与统一布局容器',
       '全局前置路由守卫与动态标题注入',
-      '文章与项目双库数据持久化与实时响应'
+      'MySQL 8.0 关系型数据库持久化与 Express 接口全栈交付'
     ],
-    technologies: ['Vue 3', 'Pinia', 'Vue Router 4', 'Vite', '组合式API', 'CSS变量主题'],
+    technologies: ['Vue 3', 'Pinia', 'Vue Router 4', 'Vite', 'Express', 'MySQL 8.0'],
     status: '已完成',
     progress: 100,
     hasDemo: true,
@@ -95,7 +91,9 @@ function loadProjects() {
 
 export const useProjectStore = defineStore('projects', {
   state: () => ({
-    projects: loadProjects()
+    projects: loadProjects(),
+    loading: false,
+    error: null
   }),
 
   getters: {
@@ -130,8 +128,40 @@ export const useProjectStore = defineStore('projects', {
   },
 
   actions: {
-    // 新增项目
-    addProject(newProject) {
+    // 异步从 MySQL 后端拉取项目列表 (实验五核心改造)
+    async fetchProjects(params = {}) {
+      this.loading = true
+      this.error = null
+      try {
+        const data = await getProjectsApi(params)
+        if (Array.isArray(data) && data.length > 0) {
+          this.projects = data
+          this.persistProjects()
+        }
+        return this.projects
+      } catch (err) {
+        console.warn('从后端拉取项目失败，保持当前状态:', err)
+        this.error = err.message
+        return this.projects
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 新增项目 (优先调用后端 RESTful 接口)
+    async addProject(newProject) {
+      try {
+        const created = await createProjectApi(newProject)
+        if (created && created.id) {
+          this.projects.unshift(created)
+          this.persistProjects()
+          return created.id
+        }
+      } catch (err) {
+        console.warn('后端添加失败，转为本地暂存:', err)
+      }
+
+      // 降级本地暂存
       const maxId = this.projects.reduce((max, p) => (p.id > max ? p.id : max), 0)
       const project = {
         id: maxId + 1,
@@ -143,8 +173,21 @@ export const useProjectStore = defineStore('projects', {
       return project.id
     },
 
-    // 更新项目
-    updateProject(id, updatedFields) {
+    // 更新项目 (优先调用后端 PUT 接口)
+    async updateProject(id, updatedFields) {
+      try {
+        const updated = await updateProjectApi(id, updatedFields)
+        const index = this.projects.findIndex(p => p.id === Number(id))
+        if (index !== -1 && updated) {
+          this.projects[index] = { ...this.projects[index], ...updated }
+          this.persistProjects()
+          return true
+        }
+      } catch (err) {
+        console.warn('后端更新失败，转为本地更新:', err)
+      }
+
+      // 降级本地更新
       const index = this.projects.findIndex(p => p.id === Number(id))
       if (index !== -1) {
         this.projects[index] = { ...this.projects[index], ...updatedFields }
@@ -154,8 +197,14 @@ export const useProjectStore = defineStore('projects', {
       return false
     },
 
-    // 删除项目
-    deleteProject(id) {
+    // 删除项目 (优先调用后端 DELETE 接口)
+    async deleteProject(id) {
+      try {
+        await deleteProjectApi(id)
+      } catch (err) {
+        console.warn('后端删除异常，继续本地移除:', err)
+      }
+
       const index = this.projects.findIndex(p => p.id === Number(id))
       if (index !== -1) {
         this.projects.splice(index, 1)

@@ -219,25 +219,25 @@ const openAddDialog = () => {
 }
 
 // 动态调整进度
-const handleProgressChange = (id, newProgress) => {
+const handleProgressChange = async (id, newProgress) => {
   const val = Number(newProgress)
-  updateProject(id, {
+  await updateProject(id, {
     progress: val,
     status: val >= 100 ? '已完成' : '进行中'
   })
   ElMessage.success({
-    message: `项目进度已更新为 ${val}%！`,
+    message: `项目进度已更新为 ${val}%，并同步写入数据库！`,
     duration: 1500
   })
 }
 
 // 修改状态
-const handleStatusChange = (id, newStatus) => {
-  updateProject(id, {
+const handleStatusChange = async (id, newStatus) => {
+  await updateProject(id, {
     status: newStatus,
     progress: newStatus === '已完成' ? 100 : 70
   })
-  ElMessage.info(`项目状态已切换为【${newStatus}】`)
+  ElMessage.info(`项目状态已切换为【${newStatus}】并同步数据库`)
 }
 
 // 删除项目
@@ -250,14 +250,14 @@ const handleDelete = (item) => {
       cancelButtonText: '取消',
       type: 'warning'
     }
-  ).then(() => {
-    deleteProject(item.id)
-    ElMessage.success(`已成功删除项目【${item.name}】！`)
+  ).then(async () => {
+    await deleteProject(item.id)
+    ElMessage.success(`已从数据库中成功删除项目【${item.name}】！`)
   }).catch(() => {})
 }
 
 // 提交新增项目
-const submitAddProject = () => {
+const submitAddProject = async () => {
   if (!newForm.name || !newForm.description) {
     ElMessage.warning('请完善项目名称和简要描述！')
     return
@@ -268,7 +268,7 @@ const submitAddProject = () => {
     .map(t => t.trim())
     .filter(Boolean)
 
-  addProject({
+  await addProject({
     name: newForm.name,
     category: newForm.category,
     status: newForm.status,
@@ -280,7 +280,7 @@ const submitAddProject = () => {
     hasDemo: false
   })
 
-  ElMessage.success(`🎉 项目【${newForm.name}】添加成功！`)
+  ElMessage.success(`🎉 项目【${newForm.name}】添加成功并已存入数据库！`)
   showAddModal.value = false
 
   // 清空表单

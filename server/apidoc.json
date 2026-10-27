@@ -1,0 +1,16 @@
+{
+  "name": "Lume Blog 全栈博客与作品集系统 - RESTful API 接口文档",
+  "version": "1.0.0",
+  "description": "《Web前端框架程序设计》实验五：网络请求与前后端交互接口说明规范。由 Node.js + Express + MySQL 8.0 驱动。",
+  "title": "Lume Blog API 接口文档",
+  "url": "http://127.0.0.1:3000",
+  "sampleUrl": "http://127.0.0.1:3000",
+  "header": {
+    "title": "概述",
+    "filename": "header.md"
+  },
+  "template": {
+    "withCompare": false,
+    "withGenerator": true
+  }
+}

@@ -31,9 +31,11 @@ import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import Navbar from './components/Navbar.vue'
 import FooterNote from './components/FooterNote.vue'
-import { useUserStore } from './stores'
+import { useUserStore, useProjectStore, useArticleStore } from './stores'
 
 const userStore = useUserStore()
+const projectStore = useProjectStore()
+const articleStore = useArticleStore()
 const { profile } = storeToRefs(userStore)
 
 // 全局暗色主题响应式状态
@@ -60,8 +62,12 @@ onMounted(() => {
     document.documentElement.classList.add('dark')
   }
 
+  // 实验五核心：应用挂载时通过 Axios 从 MySQL RESTful 接口拉取最新项目与文章数据
+  projectStore.fetchProjects()
+  articleStore.fetchArticles()
+
   console.log(
-    '%c🌟 Lume Blog (Vue Router 4 工程化) 初始化成功！%c',
+    '%c🌟 Lume Blog (Exp05 全栈架构) 初始化成功！%c',
     'background:#2563eb;color:#fff;padding:4px 8px;border-radius:4px;font-weight:bold;',
     ''
   )

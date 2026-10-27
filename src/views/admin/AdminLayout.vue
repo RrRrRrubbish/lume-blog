@@ -21,6 +21,9 @@
         </div>
 
         <div class="admin-top-actions">
+          <button class="btn btn-outline btn-sm" @click="handleExportData">
+            💾 导出全站数据 (JSON)
+          </button>
           <RouterLink :to="{ name: 'home' }" class="btn btn-outline btn-sm">
             🌐 返回前台主页
           </RouterLink>
@@ -66,6 +69,11 @@ const handleAdminLogout = () => {
     alert('已成功退出后台管理身份！')
     router.push({ name: 'home' })
   }
+}
+
+// 实验五拓展选做 2：调用后端 RESTful 数据导出接口
+const handleExportData = () => {
+  window.open('http://127.0.0.1:3000/api/export?download=true', '_blank')
 }
 </script>
 

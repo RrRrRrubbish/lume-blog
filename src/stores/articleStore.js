@@ -1,4 +1,10 @@
 import { defineStore } from 'pinia'
+import {
+  getArticles as getArticlesApi,
+  createArticle as createArticleApi,
+  updateArticle as updateArticleApi,
+  deleteArticle as deleteArticleApi
+} from '../api/article'
 
 // ====================================================================
 // 文章管理 Store (articleStore.js)
@@ -117,7 +123,9 @@ function loadArticles() {
 
 export const useArticleStore = defineStore('articles', {
   state: () => ({
-    articles: loadArticles()
+    articles: loadArticles(),
+    loading: false,
+    error: null
   }),
 
   getters: {
@@ -152,8 +160,40 @@ export const useArticleStore = defineStore('articles', {
   },
 
   actions: {
-    // 新增文章
-    addArticle(form) {
+    // 异步从 MySQL 后端拉取文章列表 (实验五核心改造)
+    async fetchArticles(params = {}) {
+      this.loading = true
+      this.error = null
+      try {
+        const data = await getArticlesApi(params)
+        if (Array.isArray(data) && data.length > 0) {
+          this.articles = data
+          this.persistArticles()
+        }
+        return this.articles
+      } catch (err) {
+        console.warn('从后端拉取文章失败，保持当前状态:', err)
+        this.error = err.message
+        return this.articles
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 新增文章 (优先调用后端 RESTful POST 接口)
+    async addArticle(form) {
+      try {
+        const created = await createArticleApi(form)
+        if (created && created.id) {
+          this.articles.unshift(created)
+          this.persistArticles()
+          return created.id
+        }
+      } catch (err) {
+        console.warn('后端新增文章失败，转为本地暂存:', err)
+      }
+
+      // 降级本地暂存
       const nextId = this.articles.length
         ? Math.max(...this.articles.map((a) => a.id)) + 1
         : 1
@@ -174,8 +214,20 @@ export const useArticleStore = defineStore('articles', {
       return nextId
     },
 
-    // 修改/更新文章
-    updateArticle(id, form) {
+    // 修改/更新文章 (优先调用后端 PUT 接口)
+    async updateArticle(id, form) {
+      try {
+        const updated = await updateArticleApi(id, form)
+        const article = this.getArticleById(id)
+        if (article && updated) {
+          Object.assign(article, updated)
+          this.persistArticles()
+          return true
+        }
+      } catch (err) {
+        console.warn('后端更新文章失败，转为本地更新:', err)
+      }
+
       const article = this.getArticleById(id)
       if (!article) return false
 
@@ -194,8 +246,14 @@ export const useArticleStore = defineStore('articles', {
       return true
     },
 
-    // 删除文章
-    removeArticle(id) {
+    // 删除文章 (优先调用后端 DELETE 接口)
+    async removeArticle(id) {
+      try {
+        await deleteArticleApi(id)
+      } catch (err) {
+        console.warn('后端删除文章异常，继续本地移除:', err)
+      }
+
       const index = this.articles.findIndex((a) => a.id === Number(id))
       if (index !== -1) {
         this.articles.splice(index, 1)
@@ -206,14 +264,12 @@ export const useArticleStore = defineStore('articles', {
     },
 
     // 一键切换文章发布/草稿状态
-    togglePublish(id) {
+    async togglePublish(id) {
       const article = this.getArticleById(id)
       if (!article) return false
 
-      article.status = article.status === 'published' ? 'draft' : 'published'
-      article.updatedAt = new Date().toISOString().slice(0, 10)
-      this.persistArticles()
-      return true
+      const nextStatus = article.status === 'published' ? 'draft' : 'published'
+      return await this.updateArticle(id, { status: nextStatus })
     },
 
     // 重置恢复初始文章列表

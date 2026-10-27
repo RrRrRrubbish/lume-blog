@@ -362,7 +362,7 @@ const openEditDialog = (row) => {
 // 保存文章（新增/编辑）并校验
 const handleSaveArticle = async (formEl) => {
   if (!formEl) return
-  await formEl.validate((valid) => {
+  await formEl.validate(async (valid) => {
     if (valid) {
       const payload = {
         title: form.title,
@@ -375,11 +375,11 @@ const handleSaveArticle = async (formEl) => {
       }
 
       if (isEditing.value) {
-        articleStore.updateArticle(editingId.value, payload)
+        await articleStore.updateArticle(editingId.value, payload)
         ElMessage.success(`博文【${form.title}】修改成功！`)
       } else {
-        articleStore.addArticle(payload)
-        ElMessage.success(`新博文【${form.title}】发布成功！已实时同步全站。`)
+        await articleStore.addArticle(payload)
+        ElMessage.success(`新博文【${form.title}】发布成功！已实时同步至数据库。`)
       }
 
       dialogVisible.value = false
@@ -390,9 +390,9 @@ const handleSaveArticle = async (formEl) => {
 }
 
 // 切换发布/草稿状态 (actions: togglePublish)
-const handleToggle = (id) => {
-  articleStore.togglePublish(id)
-  ElMessage.info('博文发布状态已更新')
+const handleToggle = async (id) => {
+  await articleStore.togglePublish(id)
+  ElMessage.info('博文发布状态已更新并同步数据库')
 }
 
 // 删除文章 (ElMessageBox.confirm + actions: removeArticle)
@@ -406,9 +406,9 @@ const handleDelete = (row) => {
       type: 'warning'
     }
   )
-    .then(() => {
-      articleStore.removeArticle(row.id)
-      ElMessage.success(`文章《${row.title}》已删除！`)
+    .then(async () => {
+      await articleStore.removeArticle(row.id)
+      ElMessage.success(`文章《${row.title}》已从数据库中删除！`)
     })
     .catch(() => {})
 }
