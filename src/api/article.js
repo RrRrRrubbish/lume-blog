@@ -10,11 +10,12 @@ import request from './request'
  * 获取文章列表
  * @param {object} params { category, status, keyword }
  */
-export function getArticles(params) {
+export function getArticles(params, options = {}) {
   return request({
     url: '/articles',
     method: 'get',
-    params
+    params,
+    ...options
   })
 }
 

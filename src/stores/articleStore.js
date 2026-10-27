@@ -160,19 +160,18 @@ export const useArticleStore = defineStore('articles', {
   },
 
   actions: {
-    // 异步从 MySQL 后端拉取文章列表 (实验五核心改造)
+    // 异步从 MySQL 后端拉取文章列表 (实验五核心改造，带静默离线降级)
     async fetchArticles(params = {}) {
       this.loading = true
       this.error = null
       try {
-        const data = await getArticlesApi(params)
+        const data = await getArticlesApi(params, { silent: true })
         if (Array.isArray(data) && data.length > 0) {
           this.articles = data
           this.persistArticles()
         }
         return this.articles
       } catch (err) {
-        console.warn('从后端拉取文章失败，保持当前状态:', err)
         this.error = err.message
         return this.articles
       } finally {

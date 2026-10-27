@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n \"server,client\" -c \"cyan,magenta\" \"node server/index.js\" \"vite\"",
+    "dev:frontend": "vite",
+    "server": "node server/index.js",
+    "start": "concurrently -k -n \"server,client\" -c \"cyan,magenta\" \"node server/index.js\" \"vite\"",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -18,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "concurrently": "^10.0.6",
     "vite": "^6.1.0"
   }
 }

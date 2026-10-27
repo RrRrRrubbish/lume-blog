@@ -10,11 +10,12 @@ import request from './request'
  * 获取项目列表
  * @param {object} params { category, keyword, status }
  */
-export function getProjects(params) {
+export function getProjects(params, options = {}) {
   return request({
     url: '/projects',
     method: 'get',
-    params
+    params,
+    ...options
   })
 }
 
